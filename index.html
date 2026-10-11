@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Центр Шифрования</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            background-color: #0f172a;
+            color: #ffffff;
+        }
+
+        /* Animated Slideshow Background */
+        .bg-slideshow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+        }
+
+        .bg-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 2.5s ease-in-out, transform 12s ease-out;
+            transform: scale(1);
+        }
+
+        .bg-slide.active {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.85) 100%);
+            z-index: -1;
+        }
+
+        /* Glassmorphism Styling */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .glass-input:focus {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.4);
+            outline: none;
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .transition-custom {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-3 sm:p-6 relative">
+
+    <!-- Background Mountain Slideshow -->
+    <div class="bg-slideshow">
+        <div class="bg-slide active" style="background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2070&auto=format&fit=crop');"></div>
+        <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070&auto=format&fit=crop');"></div>
+        <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1454496522488-7a8e488e8606?q=80&w=2070&auto=format&fit=crop');"></div>
+        <div class="bg-slide" style="background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=2070&auto=format&fit=crop');"></div>
+    </div>
+    <div class="bg-overlay"></div>
+
+    <!-- Main Container -->
+    <div class="w-full max-w-5xl glass-panel rounded-3xl p-5 sm:p-8 relative z-10 shadow-2xl my-auto">
+        
+        <!-- Header & Navigation Tabs -->
+        <div class="flex flex-col sm:flex-row justify-between items-center border-b border-white/15 pb-5 mb-6 gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-indigo-500/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shadow-inner">
+                    <i class="fa-solid fa-shield-cat text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Центр Шифрования</h1>
+                </div>
+            </div>
+
+            <!-- Tabs Selector -->
+            <div class="flex items-center space-x-1.5 bg-black/30 p-1.5 rounded-2xl border border-white/10 w-full sm:w-auto justify-center">
+                <button onclick="switchTab('photo')" id="tabPhoto" class="tab-btn active px-4 py-2.5 rounded-xl text-xs font-semibold transition-custom text-white/70 border border-transparent hover:text-white">
+                    <i class="fa-solid fa-image mr-1.5"></i> Фотографии
+                </button>
+                <button onclick="switchTab('text')" id="tabText" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold transition-custom text-white/70 border border-transparent hover:text-white">
+                    <i class="fa-solid fa-align-left mr-1.5"></i> Текст
+                </button>
+                <button onclick="switchTab('file')" id="tabFile" class="tab-btn px-4 py-2.5 rounded-xl text-xs font-semibold transition-custom text-white/70 border border-transparent hover:text-white">
+                    <i class="fa-solid fa-file-shield mr-1.5"></i> Файлы
+                </button>
+            </div>
+        </div>
+
+        <!-- 1. PHOTO SECTION (ULTRA SCRAMBLE & XOR) -->
+        <div id="sectionPhoto" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Source Photo Input -->
+                <div class="flex flex-col">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-white/80">Исходное Фото</span>
+                        <button onclick="resetPhoto()" id="resetPhotoBtn" class="text-xs text-white/50 hover:text-white hidden">
+                            <i class="fa-solid fa-arrow-rotate-left mr-1"></i>Сбросить
+                        </button>
+                    </div>
+                    <div onclick="document.getElementById('photoInput').click()" class="flex-1 min-h-[260px] border-2 border-dashed border-white/20 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition-custom bg-black/20 relative overflow-hidden">
+                        <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="onPhotoSelected(event)">
+                        <div id="photoPlaceholder" class="flex flex-col items-center text-center p-4">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl mb-3 text-indigo-300"></i>
+                            <p class="text-sm font-semibold text-white/90">Выберите или перетащите фото</p>
+                            <p class="text-xs text-white/50 mt-1">PNG, JPG, WEBP</p>
+                        </div>
+                        <img id="photoPreview" class="max-h-[240px] w-auto object-contain rounded-xl hidden" alt="Превью">
+                    </div>
+                </div>
+
+                <!-- Result Photo Container -->
+                <div class="flex flex-col">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-white/80">Результат</span>
+                        <button id="downloadPhotoBtn" onclick="downloadPhotoResult()" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold hidden">
+                            <i class="fa-solid fa-download mr-1"></i>Скачать
+                        </button>
+                    </div>
+                    <div class="flex-1 min-h-[260px] border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center bg-black/30 relative overflow-hidden">
+                        <div id="photoResultPlaceholder" class="text-center text-white/40 text-xs px-4">
+                            <i class="fa-solid fa-eye-slash text-3xl mb-2 block text-white/30"></i>
+                            Загрузите фото для обработки
+                        </div>
+                        <div id="photoLoader" class="hidden flex-col items-center space-y-2">
+                            <div class="w-8 h-8 border-3 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                            <span class="text-xs text-white/70">Обработка пикселей...</span>
+                        </div>
+                        <canvas id="photoCanvas" class="max-h-[240px] w-auto object-contain rounded-xl hidden shadow-lg"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
+                <button onclick="processPhoto('encrypt')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold transition-custom shadow-lg flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Зашифровать фото</span>
+                </button>
+                <button onclick="processPhoto('decrypt')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white text-sm font-semibold transition-custom flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-unlock"></i>
+                    <span>Расшифровать фото</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. TEXT SECTION -->
+        <div id="sectionText" class="hidden space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-white/80">Исходный текст</label>
+                        <button onclick="clearText()" class="text-xs text-white/50 hover:text-white transition-colors">
+                            <i class="fa-solid fa-trash-can mr-1"></i>Очистить
+                        </button>
+                    </div>
+                    <textarea id="textInput" rows="7" placeholder="Введите текст для обработки..." class="w-full glass-input rounded-2xl p-4 text-sm resize-none focus:ring-0"></textarea>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-white/80">Результат</label>
+                        <button onclick="copyTextResult()" class="text-xs text-indigo-300 hover:text-white transition-colors font-medium">
+                            <i class="fa-regular fa-copy mr-1"></i>Скопировать
+                        </button>
+                    </div>
+                    <textarea id="textOutput" rows="7" readonly placeholder="Здесь появится результат..." class="w-full glass-input rounded-2xl p-4 text-sm resize-none font-mono text-indigo-200"></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
+                <button onclick="processText('encrypt')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold transition-custom shadow-lg flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Зашифровать текст</span>
+                </button>
+                <button onclick="processText('decrypt')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white text-sm font-semibold transition-custom flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-unlock"></i>
+                    <span>Расшифровать текст</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. FILE SECTION -->
+        <div id="sectionFile" class="hidden space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="flex flex-col">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-white/80 mb-2">Выберите Файл</span>
+                    <div onclick="document.getElementById('generalFileInput').click()" class="flex-1 min-h-[240px] border-2 border-dashed border-white/20 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-indigo-400 transition-custom bg-black/20">
+                        <input type="file" id="generalFileInput" class="hidden" onchange="onGeneralFileSelected(event)">
+                        <div id="filePlaceholder" class="flex flex-col items-center text-center p-4">
+                            <i class="fa-solid fa-file-circle-plus text-4xl mb-3 text-indigo-300"></i>
+                            <p class="text-sm font-semibold text-white/90">Выберите любой файл</p>
+                            <p class="text-xs text-white/50 mt-1">Документы, архивы, аудио, видео</p>
+                        </div>
+                        <div id="fileSelectedInfo" class="hidden flex-col items-center text-center">
+                            <i class="fa-solid fa-file-lines text-5xl text-indigo-400 mb-3"></i>
+                            <p id="fileName" class="text-sm font-semibold text-white max-w-[220px] truncate"></p>
+                            <p id="fileSize" class="text-xs text-white/50 mt-1"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-white/80 mb-2">Результат</span>
+                    <div class="flex-1 min-h-[240px] border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center bg-black/30">
+                        <div id="generalFileResultPlaceholder" class="text-center text-white/40 text-xs px-4">
+                            <i class="fa-solid fa-box-archive text-3xl mb-2 block text-white/30"></i>
+                            Готовый файл появится здесь
+                        </div>
+                        <div id="fileLoader" class="hidden flex-col items-center space-y-2">
+                            <div class="w-8 h-8 border-3 border-indigo-400 border-t-transparent rounded-full animate-spin"></div>
+                            <span class="text-xs text-white/70">Обработка файла...</span>
+                        </div>
+                        <div id="generalFileReady" class="hidden flex-col items-center text-center">
+                            <i class="fa-solid fa-circle-check text-5xl text-emerald-400 mb-3"></i>
+                            <p class="text-sm font-semibold text-white">Файл успешно обработан!</p>
+                            <button onclick="downloadProcessedFile()" class="mt-4 px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold transition-custom shadow-lg flex items-center space-x-2">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Скачать файл</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-end items-center gap-3 pt-2">
+                <button onclick="processGeneralFile('encrypt')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold transition-custom shadow-lg flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Зашифровать файл</span>
+                </button>
+                <button onclick="processGeneralFile('decrypt')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 text-white text-sm font-semibold transition-custom flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-unlock"></i>
+                    <span>Расшифровать файл</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-300 bg-black/85 backdrop-blur-md border border-white/20 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 z-50 pointer-events-none text-sm">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <span id="toastMessage">Операция выполнена</span>
+    </div>
+
+    <script>
+        // System Encryption Key Array
+        const SYSTEM_MASK = [0x9E, 0x37, 0x79, 0xB9, 0x1A, 0x82, 0x4B, 0xE3, 0x61, 0xD4, 0x05, 0xF8];
+
+        let loadedPhoto = null;
+        let selectedFile = null;
+        let processedFileBlob = null;
+        let processedFileName = '';
+
+        // Slideshow Navigation
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.bg-slide');
+        setInterval(() => {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }, 7000);
+
+        // Tab Switcher
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('sectionText').classList.add('hidden');
+            document.getElementById('sectionPhoto').classList.add('hidden');
+            document.getElementById('sectionFile').classList.add('hidden');
+
+            if (tab === 'text') {
+                document.getElementById('tabText').classList.add('active');
+                document.getElementById('sectionText').classList.remove('hidden');
+            } else if (tab === 'photo') {
+                document.getElementById('tabPhoto').classList.add('active');
+                document.getElementById('sectionPhoto').classList.remove('hidden');
+            } else if (tab === 'file') {
+                document.getElementById('tabFile').classList.add('active');
+                document.getElementById('sectionFile').classList.remove('hidden');
+            }
+        }
+
+        function processText(action) {
+            const input = document.getElementById('textInput').value;
+            if (!input) { 
+                showToast('Введите текст!', 'error'); 
+                return; 
+            }
+
+            if (action === 'encrypt') {
+                let transformed = '';
+                for (let i = 0; i < input.length; i++) {
+                    const charCode = input.charCodeAt(i) ^ SYSTEM_MASK[i % SYSTEM_MASK.length];
+                    transformed += String.fromCharCode(charCode);
+                }
+                const result = btoa(encodeURIComponent(transformed));
+                document.getElementById('textOutput').value = result;
+                showToast('Текст зашифрован!');
+            } else {
+                try {
+                    const raw = decodeURIComponent(atob(input));
+                    let original = '';
+                    for (let i = 0; i < raw.length; i++) {
+                        const charCode = raw.charCodeAt(i) ^ SYSTEM_MASK[i % SYSTEM_MASK.length];
+                        original += String.fromCharCode(charCode);
+                    }
+                    document.getElementById('textOutput').value = original;
+                    showToast('Текст расшифрован!');
+                } catch(e) {
+                    showToast('Ошибка при расшифровке', 'error');
+                }
+            }
+        }
+
+        function clearText() {
+            document.getElementById('textInput').value = '';
+            document.getElementById('textOutput').value = '';
+        }
+
+        function copyTextResult() {
+            const out = document.getElementById('textOutput').value;
+            if (!out) return;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(out);
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = out;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+            }
+            showToast('Скопировано!');
+        }
+
+        function onPhotoSelected(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const img = new Image();
+                    img.onload = function() {
+                        loadedPhoto = img;
+                        document.getElementById('photoPreview').src = evt.target.result;
+                        document.getElementById('photoPreview').classList.remove('hidden');
+                        document.getElementById('photoPlaceholder').classList.add('hidden');
+                        document.getElementById('resetPhotoBtn').classList.remove('hidden');
+                    };
+                    img.src = evt.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function resetPhoto() {
+            loadedPhoto = null;
+            document.getElementById('photoInput').value = '';
+            document.getElementById('photoPreview').src = '';
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('photoPlaceholder').classList.remove('hidden');
+            document.getElementById('resetPhotoBtn').classList.add('hidden');
+            document.getElementById('photoCanvas').classList.add('hidden');
+            document.getElementById('photoResultPlaceholder').classList.remove('hidden');
+            document.getElementById('downloadPhotoBtn').classList.add('hidden');
+        }
+
+        function processPhoto(action) {
+            if (!loadedPhoto) { 
+                showToast('Загрузите фото!', 'error'); 
+                return; 
+            }
+
+            document.getElementById('photoResultPlaceholder').classList.add('hidden');
+            document.getElementById('photoCanvas').classList.add('hidden');
+            document.getElementById('photoLoader').classList.remove('hidden');
+            document.getElementById('photoLoader').classList.add('flex');
+
+            setTimeout(() => {
+                const canvas = document.getElementById('photoCanvas');
+                const ctx = canvas.getContext('2d');
+                const w = loadedPhoto.width;
+                const h = loadedPhoto.height;
+                canvas.width = w;
+                canvas.height = h;
+
+                ctx.drawImage(loadedPhoto, 0, 0);
+                const imgData = ctx.getImageData(0, 0, w, h);
+                const data = imgData.data;
+                const totalPixels = w * h;
+
+                let seed = 1337;
+                function lcg() {
+                    seed = (1664525 * seed + 1013904223) % 4294967296;
+                    return seed / 4294967296;
+                }
+
+                const pMap = new Int32Array(totalPixels);
+                for (let i = 0; i < totalPixels; i++) pMap[i] = i;
+
+                for (let i = totalPixels - 1; i > 0; i--) {
+                    const j = Math.floor(lcg() * (i + 1));
+                    const temp = pMap[i];
+                    pMap[i] = pMap[j];
+                    pMap[j] = temp;
+                }
+
+                if (action === 'encrypt') {
+                    const copy = new Uint8ClampedArray(data);
+                    for (let i = 0; i < totalPixels; i++) {
+                        const srcIdx = i * 4;
+                        const destIdx = pMap[i] * 4;
+                        data[destIdx]     = copy[srcIdx];
+                        data[destIdx + 1] = copy[srcIdx + 1];
+                        data[destIdx + 2] = copy[srcIdx + 2];
+                        data[destIdx + 3] = copy[srcIdx + 3];
+                    }
+
+                    for (let i = 0; i < totalPixels; i++) {
+                        const idx = i * 4;
+                        const k1 = SYSTEM_MASK[i % SYSTEM_MASK.length];
+                        const k2 = (i * 37) % 256;
+                        
+                        data[idx]     = (data[idx] ^ k1 ^ k2);
+                        data[idx + 1] = (data[idx + 1] ^ k1 ^ k2);
+                        data[idx + 2] = (data[idx + 2] ^ k1 ^ k2);
+                        data[idx + 3] = 255;
+                    }
+                } else {
+                    for (let i = 0; i < totalPixels; i++) {
+                        const idx = i * 4;
+                        const k1 = SYSTEM_MASK[i % SYSTEM_MASK.length];
+                        const k2 = (i * 37) % 256;
+                        
+                        data[idx]     = (data[idx] ^ k1 ^ k2);
+                        data[idx + 1] = (data[idx + 1] ^ k1 ^ k2);
+                        data[idx + 2] = (data[idx + 2] ^ k1 ^ k2);
+                    }
+
+                    const copy = new Uint8ClampedArray(data);
+                    for (let i = 0; i < totalPixels; i++) {
+                        const srcIdx = pMap[i] * 4;
+                        const destIdx = i * 4;
+                        data[destIdx]     = copy[srcIdx];
+                        data[destIdx + 1] = copy[srcIdx + 1];
+                        data[destIdx + 2] = copy[srcIdx + 2];
+                        data[destIdx + 3] = copy[srcIdx + 3];
+                    }
+                }
+
+                ctx.putImageData(imgData, 0, 0);
+                document.getElementById('photoLoader').classList.add('hidden');
+                document.getElementById('photoLoader').classList.remove('flex');
+                canvas.classList.remove('hidden');
+                document.getElementById('downloadPhotoBtn').classList.remove('hidden');
+                showToast(action === 'encrypt' ? 'Фото зашифровано!' : 'Фото расшифровано!');
+            }, 100);
+        }
+
+        function downloadPhotoResult() {
+            const canvas = document.getElementById('photoCanvas');
+            const link = document.createElement('a');
+            link.download = 'encrypted_photo.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function onGeneralFileSelected(e) {
+            const file = e.target.files[0];
+            if (file) {
+                selectedFile = file;
+                document.getElementById('fileName').innerText = file.name;
+                document.getElementById('fileSize').innerText = (file.size / 1024).toFixed(1) + ' KB';
+                document.getElementById('filePlaceholder').classList.add('hidden');
+                document.getElementById('fileSelectedInfo').classList.remove('hidden');
+                document.getElementById('fileSelectedInfo').classList.add('flex');
+                
+                document.getElementById('generalFileReady').classList.add('hidden');
+                document.getElementById('generalFileResultPlaceholder').classList.remove('hidden');
+            }
+        }
+
+        function processGeneralFile(action) {
+            if (!selectedFile) { 
+                showToast('Выберите файл!', 'error'); 
+                return; 
+            }
+
+            document.getElementById('generalFileResultPlaceholder').classList.add('hidden');
+            document.getElementById('generalFileReady').classList.add('hidden');
+            document.getElementById('fileLoader').classList.remove('hidden');
+            document.getElementById('fileLoader').classList.add('flex');
+
+            setTimeout(() => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const buffer = new Uint8Array(e.target.result);
+
+                    for (let i = 0; i < buffer.length; i++) {
+                        const k1 = SYSTEM_MASK[i % SYSTEM_MASK.length];
+                        const k2 = (i * 17) % 256;
+                        buffer[i] = buffer[i] ^ k1 ^ k2;
+                    }
+
+                    processedFileBlob = new Blob([buffer], { type: 'application/octet-stream' });
+                    
+                    if (action === 'encrypt') {
+                        processedFileName = selectedFile.name.endsWith('.enc') ? selectedFile.name : selectedFile.name + '.enc';
+                    } else {
+                        processedFileName = selectedFile.name.endsWith('.enc') ? selectedFile.name.slice(0, -4) : 'decrypted_' + selectedFile.name;
+                    }
+
+                    document.getElementById('fileLoader').classList.add('hidden');
+                    document.getElementById('fileLoader').classList.remove('flex');
+                    document.getElementById('generalFileReady').classList.remove('hidden');
+                    document.getElementById('generalFileReady').classList.add('flex');
+                    
+                    showToast(action === 'encrypt' ? 'Файл зашифрован!' : 'Файл расшифрован!');
+                };
+                reader.readAsArrayBuffer(selectedFile);
+            }, 150);
+        }
+
+        function downloadProcessedFile() {
+            if (!processedFileBlob) return;
+            const url = URL.createObjectURL(processedFileBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = processedFileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastMessage').innerText = msg;
+
+            if (type === 'error') {
+                icon.className = 'fa-solid fa-circle-exclamation text-rose-400 text-lg';
+            } else {
+                icon.className = 'fa-solid fa-circle-check text-emerald-400 text-lg';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
